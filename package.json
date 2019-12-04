@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "start-storybook -p 6006"
+    "start": "start-storybook -p 6006",
+    "prettier": "prettier --write --config .prettierrc **/*.{js,ts,tsx,css,sass,scss}"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/react": "^16.9.14",
     "@types/react-dom": "^16.9.4",
+    "prettier": "^1.19.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "typescript": "^3.7.3"
