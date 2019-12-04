@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { storiesOf } from "@storybook/react";
+import { usePersistedState } from "../utils";
 
 storiesOf("day 01", module)
   .add("part 1", () => {
-    const [input, setInput] = useState<string>("");
+    const [input, setInput] = usePersistedState("day 1 part 1", "");
 
     const answer = useMemo(() => {
       if (!input) {
@@ -28,7 +29,7 @@ storiesOf("day 01", module)
     );
   })
   .add("part 2", () => {
-    const [input, setInput] = useState<string>("");
+    const [input, setInput] = usePersistedState("day 1 part 2", "");
 
     const fuelForMass = (mass: number) => Math.max(Math.floor(mass / 3) - 2, 0);
 
@@ -59,10 +60,6 @@ storiesOf("day 01", module)
       const nums = lines.map(x => parseInt(x));
       const fuels = nums.map(fuelForMass2);
       let mass = fuels.reduce((a, b) => a + b, 0);
-
-      //   const result: string[] = [];
-
-      //   return result;
 
       return mass;
     }, [input]);
