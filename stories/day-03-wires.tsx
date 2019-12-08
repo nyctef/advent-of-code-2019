@@ -28,6 +28,26 @@ const applyStep = (
   }
 };
 
+type LineSegment = {
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
+};
+
+const intersects = (l1: LineSegment, l2: LineSegment) => {
+  // two lines intersect if they can't be separated on either axis
+  // assuming axis-aligned lines
+  // TODO: check for "real" intersection (orthogonal lines) ?
+  // TODO: return intersection point or null
+  return !(
+    (l1.x1 > l2.x1 && l1.x2 > l2.x2) ||
+    (l1.x1 < l2.x1 && l1.x2 < l2.x2) ||
+    (l1.y1 > l2.y1 && l1.y2 > l2.y2) ||
+    (l1.y1 < l2.y1 && l1.y2 < l2.y2)
+  );
+};
+
 storiesOf("day 03", module)
   .add("part 1", () => {
     const [input, setInput] = usePersistedState("day 3 part 1", "");
@@ -51,12 +71,7 @@ storiesOf("day 03", module)
       });
 
     const lines = paths.map(line => {
-      const lines = new Array<{
-        x1: number;
-        x2: number;
-        y1: number;
-        y2: number;
-      }>(line.length);
+      const lines = new Array<LineSegment>(line.length);
       for (let i = 0; i < lines.length; i++) {
         const left = i === 0 ? { x: 0, y: 0 } : line[i - 1];
         const right = line[i];
