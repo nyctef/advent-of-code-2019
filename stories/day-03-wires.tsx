@@ -5,8 +5,16 @@ import { number } from "prop-types";
 
 const Crosshair = () => (
   <>
-    <line x1="-10" x2="10" style={{ stroke: "rgb(255,0,0)", strokeWidth: 2 }} />
-    <line y1="-10" y2="10" style={{ stroke: "rgb(255,0,0)", strokeWidth: 2 }} />
+    <line
+      x1="-10"
+      x2="10"
+      style={{ stroke: "rgb(255,0,0)", strokeWidth: 400 }}
+    />
+    <line
+      y1="-10"
+      y2="10"
+      style={{ stroke: "rgb(255,0,0)", strokeWidth: 400 }}
+    />
   </>
 );
 
@@ -48,6 +56,9 @@ const intersects = (l1: LineSegment, l2: LineSegment) => {
   );
 };
 
+const arrMin = (arr: number[]): number => Math.min(...arr);
+const arrMax = (arr: number[]): number => Math.max(...arr);
+
 storiesOf("day 03", module)
   .add("part 1", () => {
     const [input, setInput] = usePersistedState("day 3 part 1", "");
@@ -80,11 +91,31 @@ storiesOf("day 03", module)
       return lines;
     });
 
+    const minX = arrMin(
+      lines.map(line => arrMin(line.map(l => Math.min(l.x1, l.x2))))
+    );
+    const maxX = arrMax(
+      lines.map(line => arrMax(line.map(l => Math.max(l.x1, l.x2))))
+    );
+    const minY = arrMin(
+      lines.map(line => arrMin(line.map(l => Math.min(l.y1, l.y2))))
+    );
+    const maxY = arrMax(
+      lines.map(line => arrMax(line.map(l => Math.max(l.y1, l.y2))))
+    );
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    const scale = 1000 / width;
+
+    console.log({ minX, maxX, minY, maxY, width, height, scale });
+
     const segmentsSvg = lines.map(line =>
       line.map(segment => (
         <line
           {...segment}
-          style={{ stroke: "rgb(255,0,0)", strokeWidth: 10 }}
+          style={{ stroke: "rgb(0,0,0)", strokeWidth: Math.floor(1 / scale) }}
         />
       ))
     );
@@ -92,10 +123,12 @@ storiesOf("day 03", module)
     const answer = "foo";
 
     const svg = (
-      <svg height="3000" width="3000" style={{ border: "1px solid black" }}>
-        <g transform="translate(150,150) scale(0.1)">
-          <Crosshair />
-          <g>{segmentsSvg}</g>
+      <svg height="500" width="1000" style={{ border: "1px solid black" }}>
+        <g transform={`scale(${scale})`}>
+          <g transform={`translate(${Math.abs(minX)} ${Math.abs(maxY)})`}>
+            <Crosshair />
+            <g>{segmentsSvg}</g>
+          </g>
         </g>
       </svg>
     );
