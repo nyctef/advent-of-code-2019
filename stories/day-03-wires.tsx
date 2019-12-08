@@ -32,7 +32,7 @@ storiesOf("day 03", module)
   .add("part 1", () => {
     const [input, setInput] = usePersistedState("day 3 part 1", "");
 
-    const lines = input
+    const paths = input
       .split(/[\r\n ]+/g)
       .map(line =>
         line
@@ -50,26 +50,29 @@ storiesOf("day 03", module)
         return positions;
       });
 
-    const segments = lines.map(line => {
-      const segments = new Array<ReactNode>(line.length);
-      for (let i = 0; i < segments.length; i++) {
+    const lines = paths.map(line => {
+      const lines = new Array<{
+        x1: number;
+        x2: number;
+        y1: number;
+        y2: number;
+      }>(line.length);
+      for (let i = 0; i < lines.length; i++) {
         const left = i === 0 ? { x: 0, y: 0 } : line[i - 1];
         const right = line[i];
-
-        segments[i] = (
-          <line
-            x1={left.x}
-            y1={left.y}
-            x2={right.x}
-            y2={right.y}
-            style={{ stroke: "rgb(255,0,0)", strokeWidth: 10 }}
-          />
-        );
-
-        console.log({ left, right });
+        lines[i] = { x1: left.x, y1: left.y, x2: right.x, y2: right.y };
       }
-      return segments;
+      return lines;
     });
+
+    const segmentsSvg = lines.map(line =>
+      line.map(segment => (
+        <line
+          {...segment}
+          style={{ stroke: "rgb(255,0,0)", strokeWidth: 10 }}
+        />
+      ))
+    );
 
     const answer = "foo";
 
@@ -77,7 +80,7 @@ storiesOf("day 03", module)
       <svg height="3000" width="3000" style={{ border: "1px solid black" }}>
         <g transform="translate(150,150) scale(0.1)">
           <Crosshair />
-          <g>{segments}</g>
+          <g>{segmentsSvg}</g>
         </g>
       </svg>
     );
@@ -90,7 +93,7 @@ storiesOf("day 03", module)
         </div>
         <div>Answer: {answer} </div>
         <div>Viz: {svg} </div>
-        <pre>Lines: {JSON.stringify(lines, null, 2)}</pre>
+        <pre>Paths: {JSON.stringify(paths, null, 2)}</pre>
       </>
     );
   })
