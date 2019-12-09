@@ -47,38 +47,34 @@ storiesOf("day 04", module)
   .add("part 2", () => {
     const [input, setInput] = usePersistedState("day 4 part 2", "");
 
-    const fuelForMass = (mass: number) => Math.max(Math.floor(mass / 3) - 2, 0);
+    const [lower, upper] = input
+      .trim()
+      .split("-")
+      .map(x => parseInt(x));
 
-    const fuelForMass2 = (mass: number) => {
-      let fuelMass = fuelForMass(mass);
-      let additionalFuel = fuelForMass(fuelMass);
-      while (true) {
-        if (additionalFuel > 0) {
-          //   result.push(
-          //     `Fuel mass ${mass} requires additional fuel ${additionalFuel}`
-          //   );
-          fuelMass += additionalFuel;
-        } else {
-          //   result.push(`Fuel mass ${mass} can be launched`);
-          break;
+    const answer = new Array();
+
+    const pairNumberRegex = new Array(10)
+      .fill(null)
+      .map((_, i) => `(([^${i}]|\\b)${i}${i}([^${i}]|\\b))`)
+      .join("|");
+
+    for (let i = lower; i <= upper; i++) {
+      const istr = `${i}`;
+
+      let hasPair = istr.match(pairNumberRegex);
+      let monotonic = true;
+
+      for (let c = 1; c < istr.length; c++) {
+        if (parseInt(istr[c]) < parseInt(istr[c - 1])) {
+          monotonic = false;
         }
-        additionalFuel = fuelForMass(additionalFuel);
-      }
-      return fuelMass;
-    };
-
-    const answer = useMemo(() => {
-      if (!input) {
-        return ["set input"];
       }
 
-      const lines = input.split(/[\r\n ]+/g);
-      const nums = lines.map(x => parseInt(x));
-      const fuels = nums.map(fuelForMass2);
-      let mass = fuels.reduce((a, b) => a + b, 0);
-
-      return mass;
-    }, [input]);
+      if (hasPair && monotonic) {
+        answer.push(istr);
+      }
+    }
 
     return (
       <>
@@ -86,7 +82,9 @@ storiesOf("day 04", module)
           Problem input:{" "}
           <input value={input} onChange={e => setInput(e.target.value)} />
         </div>
-        <div>Answer: {answer}</div>
+        <div>Regex: {pairNumberRegex.toString()} </div>
+        <div>Length: {answer.length} </div>
+        <div>Answer: {JSON.stringify(answer)} </div>
       </>
     );
   });
