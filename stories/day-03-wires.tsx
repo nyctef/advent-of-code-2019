@@ -43,16 +43,30 @@ type LineSegment = {
   y2: number;
 };
 
-const intersects = (l1: LineSegment, l2: LineSegment) => {
+const intersection = (l1: LineSegment, l2: LineSegment) => {
   // two lines intersect if they can't be separated on either axis
   // assuming axis-aligned lines
-  // TODO: check for "real" intersection (orthogonal lines) ?
-  // TODO: return intersection point or null
-  return !(
+  if (
     (l1.x1 > l2.x1 && l1.x2 > l2.x2) ||
     (l1.x1 < l2.x1 && l1.x2 < l2.x2) ||
     (l1.y1 > l2.y1 && l1.y2 > l2.y2) ||
     (l1.y1 < l2.y1 && l1.y2 < l2.y2)
+  ) {
+    return null;
+  }
+
+  if ((l1.x1 === l1.x2) === (l2.x1 === l2.x2)) {
+    // both lines are horizontal or both are vertical
+    return null;
+  }
+
+  return (
+    // the intersection point is the y value of the horizontal line
+    // and the x value of the vertical line
+    {
+      x: l1.x1 === l1.x2 ? l1.x1 : l2.x1,
+      y: l1.y1 === l1.y2 ? l1.y1 : l2.y1
+    }
   );
 };
 
@@ -90,6 +104,16 @@ storiesOf("day 03", module)
       }
       return lines;
     });
+
+    const inters = new Array<{ x: number; y: number }>();
+    for (let ls1 of lines[0]) {
+      for (let ls2 of lines[1]) {
+        const inter = intersection(ls1, ls2);
+        if (inter) {
+          inters.push(inter);
+        }
+      }
+    }
 
     const minX = arrMin(
       lines.map(line => arrMin(line.map(l => Math.min(l.x1, l.x2))))
@@ -141,7 +165,7 @@ storiesOf("day 03", module)
         </div>
         <div>Answer: {answer} </div>
         <div>Viz: {svg} </div>
-        <pre>Paths: {JSON.stringify(paths, null, 2)}</pre>
+        <pre>Intersections: {JSON.stringify(inters, null, 2)}</pre>
       </>
     );
   })
