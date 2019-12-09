@@ -19,18 +19,18 @@ const Crosshair = () => (
 );
 
 const applyStep = (
-  acc: { x: number; y: number },
+  acc: { x: number; y: number; length: number },
   { dir, length }: { dir: string; length: number }
 ) => {
   switch (dir) {
     case "U":
-      return { ...acc, y: acc.y + length };
+      return { ...acc, y: acc.y + length, length: acc.length + length };
     case "D":
-      return { ...acc, y: acc.y - length };
+      return { ...acc, y: acc.y - length, length: acc.length + length };
     case "L":
-      return { ...acc, x: acc.x - length };
+      return { ...acc, x: acc.x - length, length: acc.length + length };
     case "R":
-      return { ...acc, x: acc.x + length };
+      return { ...acc, x: acc.x + length, length: acc.length + length };
     default:
       return acc;
   }
@@ -41,6 +41,7 @@ type LineSegment = {
   x2: number;
   y1: number;
   y2: number;
+  length: number;
 };
 
 const intersection = (l1: LineSegment, l2: LineSegment) => {
@@ -70,6 +71,12 @@ const intersection = (l1: LineSegment, l2: LineSegment) => {
   );
 };
 
+const distance = (ls1: LineSegment, spot: { x: number; y: number }) => {
+  const x = Math.abs(spot.x - ls1.x1);
+  const y = Math.abs(spot.y - ls1.y1);
+  return x + y;
+};
+
 const arrMin = (arr: number[]): number => Math.min(...arr);
 const arrMax = (arr: number[]): number => Math.max(...arr);
 
@@ -85,10 +92,12 @@ storiesOf("day 03", module)
           .map(step => ({ dir: step[0], length: parseInt(step.substr(1)) }))
       )
       .map(line => {
-        const positions = new Array<{ x: number; y: number }>(line.length);
+        const positions = new Array<{ x: number; y: number; length: number }>(
+          line.length
+        );
         for (let i = 0; i < line.length; i++) {
           positions[i] = applyStep(
-            i === 0 ? { x: 0, y: 0 } : positions[i - 1],
+            i === 0 ? { x: 0, y: 0, length: 0 } : positions[i - 1],
             line[i]
           );
         }
@@ -98,19 +107,32 @@ storiesOf("day 03", module)
     const lines = paths.map(line => {
       const lines = new Array<LineSegment>(line.length);
       for (let i = 0; i < lines.length; i++) {
-        const left = i === 0 ? { x: 0, y: 0 } : line[i - 1];
+        const left = i === 0 ? { x: 0, y: 0, length: 0 } : line[i - 1];
         const right = line[i];
-        lines[i] = { x1: left.x, y1: left.y, x2: right.x, y2: right.y };
+        lines[i] = {
+          x1: left.x,
+          y1: left.y,
+          x2: right.x,
+          y2: right.y,
+          length: left.length
+        };
       }
       return lines;
     });
 
-    const inters = new Array<{ x: number; y: number }>();
+    const inters = new Array<{ x: number; y: number; length: number }>();
     for (let ls1 of lines[0]) {
       for (let ls2 of lines[1]) {
         const inter = intersection(ls1, ls2);
         if (inter) {
-          inters.push(inter);
+          inters.push({
+            ...inter,
+            length:
+              ls1.length +
+              ls2.length +
+              distance(ls1, inter) +
+              distance(ls2, inter)
+          });
         }
       }
     }
@@ -166,6 +188,7 @@ storiesOf("day 03", module)
         <div>Answer: {answer} </div>
         <div>Viz: {svg} </div>
         <pre>Intersections: {JSON.stringify(inters, null, 2)}</pre>
+        <pre>Lines: {JSON.stringify(lines, null, 2)}</pre>
       </>
     );
   })
